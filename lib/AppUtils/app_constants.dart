@@ -1,10 +1,3 @@
-/*
-Title: AppConstants used thorough App
-Purpose:AppConstants used thorough App
-Created On: 12/06/2024
-Edited On:12/06/2024
-Author: Kalpesh Khandla
-*/
 
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_images.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_strings.dart';
