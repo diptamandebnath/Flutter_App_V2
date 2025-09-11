@@ -261,7 +261,7 @@ class AppStrings {
   static const String sendCode = 'Send Code';
   static const String verify = 'Verify';
   static const String enterFiveDigit =
-      'Enter 5-digit PIN code sent to your phone number';
+      'Enter 6-digit PIN code sent to your phone number';
   static const String didnot = 'Did not received code?';
 
   static const String sendAgain = 'send again';

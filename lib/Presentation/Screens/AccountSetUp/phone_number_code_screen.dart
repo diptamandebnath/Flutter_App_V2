@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_colors.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_images.dart';
@@ -6,9 +7,17 @@ import 'package:flutter_home_service_provider_app_clone/Presentation/Screens/Acc
 import 'package:flutter_home_service_provider_app_clone/Presentation/Widgets/button_style_widget.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Widgets/enter_phone_code_widget.dart';
 
-class PhoneNumberCodeScreen extends StatelessWidget {
-  const PhoneNumberCodeScreen({super.key});
+class PhoneNumberCodeScreen extends StatefulWidget {
+  final String verificationId;
+  const PhoneNumberCodeScreen({super.key, required this.verificationId});
 
+  @override
+  State<PhoneNumberCodeScreen> createState() => _PhoneNumberCodeScreenState();
+}
+
+class _PhoneNumberCodeScreenState extends State<PhoneNumberCodeScreen> {
+  final codeController = TextEditingController();
+  final auth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,18 +52,32 @@ class PhoneNumberCodeScreen extends StatelessWidget {
             const SizedBox(
               height: 48,
             ),
-            const CodeInputWidget(),
+            CodeInputWidget(
+              codeController: codeController,
+            ),
             const SizedBox(
               height: 57,
             ),
             InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const LocationAccessScreen(),
-                  ),
-                );
+              onTap: () async {
+                final credential = PhoneAuthProvider.credential(
+                    verificationId: widget.verificationId,
+                    smsCode: codeController.text);
+                try {
+                  await auth.signInWithCredential(credential);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LocationAccessScreen(),
+                    ),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(e.toString()),
+                    ),
+                  );
+                }
               },
               child: const ButtonStyleWidget(
                 title: AppStrings.verify,
