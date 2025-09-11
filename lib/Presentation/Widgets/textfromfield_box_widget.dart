@@ -69,6 +69,7 @@ class _TextFromFieldBoxPasswordState extends State<TextFromFieldBoxPassword> {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: widget.controller,
+      obscureText: icons,
       decoration: InputDecoration(
         enabledBorder: OutlineInputBorder(
           borderSide: const BorderSide(color: Colors.grey),
