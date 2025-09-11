@@ -21,7 +21,7 @@ class _HowToCaseState extends State<HowToCaseScreen> {
   final TextEditingController _additionalInfoController =
       TextEditingController();
 
-  navigateToAnotherScreen() {
+  Future navigateToAnotherScreen() {
     return Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => const BottomNavigationBarWidget(),
@@ -29,7 +29,7 @@ class _HowToCaseState extends State<HowToCaseScreen> {
     );
   }
 
-  _showConfirmationDialog() {
+  Future _showConfirmationDialog() {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -39,31 +39,31 @@ class _HowToCaseState extends State<HowToCaseScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.check_circle,
               color: AppColors.blueColors,
               size: 50,
             ),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               AppStrings.appReceived,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 10),
-            Text(
+            const SizedBox(height: 10),
+            const Text(
               AppStrings.yourApp,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             InkWell(
               onTap: () {
                 navigateToAnotherScreen();
               },
-              child: ButtonStyleWidget(
+              child: const ButtonStyleWidget(
                 title: AppStrings.home,
                 colors: AppColors.blueColors,
               ),

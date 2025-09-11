@@ -25,7 +25,7 @@ class CustomSwitchListTileWidget extends StatelessWidget {
         ),
         value: value,
         onChanged: onChanged,
-        activeColor: AppColors.blueColors,
+        activeThumbColor: AppColors.blueColors,
         activeTrackColor: const Color.fromARGB(255, 160, 182, 240),
         inactiveThumbColor: Colors.grey,
         inactiveTrackColor: Colors.white,

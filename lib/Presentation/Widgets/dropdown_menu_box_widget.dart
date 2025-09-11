@@ -32,7 +32,7 @@ class _DropdownMenuBoxState extends State<DropdownMenuBoxWidget> {
           ),
           borderRadius: BorderRadius.circular(6),
           hint: Text(widget.hintText),
-          value: selectedItem,
+          initialValue: selectedItem,
           onChanged: (value) {
             setState(() {
               selectedItem = value;

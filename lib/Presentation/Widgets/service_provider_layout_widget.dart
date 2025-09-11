@@ -15,7 +15,7 @@ class ServiceProviderLayoutWidget extends StatelessWidget {
     required this.listofdata,
   });
 
-  navigateToAnotherScreen(BuildContext context) {
+  void navigateToAnotherScreen(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(

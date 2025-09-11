@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_colors.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_images.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_strings.dart';
@@ -20,9 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController captchaController = TextEditingController();
-
-  final String _hardcodedEmail = 'admin@fixit.com';
-  final String _hardcodedPassword = 'admin123';
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   late int _num1;
   late int _num2;
@@ -41,10 +40,8 @@ class _LoginScreenState extends State<LoginScreen> {
     _captchaAnswer = _num1 + _num2;
   }
 
-  void _submitLogin() {
+  Future<void> _submitLogin() async {
     if (_formKey.currentState!.validate()) {
-      String enteredEmail = emailController.text.trim();
-      String enteredPassword = passwordController.text.trim();
       int? enteredCaptcha = int.tryParse(captchaController.text.trim());
 
       if (enteredCaptcha != _captchaAnswer) {
@@ -59,18 +56,35 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      if (enteredEmail == _hardcodedEmail &&
-          enteredPassword == _hardcodedPassword) {
+      try {
+        final UserCredential user = await _auth.signInWithEmailAndPassword(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        );
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => const HomePageScreen(),
           ),
         );
-      } else {
+      } on FirebaseAuthException catch (e) {
+        String errorMessage;
+        switch (e.code) {
+          case 'user-not-found':
+            errorMessage = 'No user found with that email.';
+            break;
+          case 'wrong-password':
+            errorMessage = 'Incorrect password.';
+            break;
+          case 'invalid-email':
+            errorMessage = 'The email address is not valid.';
+            break;
+          default:
+            errorMessage = e.message ?? "An unknown error occurred";
+        }
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Invalid email or password"),
+          SnackBar(
+            content: Text(errorMessage),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -139,7 +153,8 @@ class _LoginScreenState extends State<LoginScreen> {
               // 👇 CAPTCHA Field
               Text(
                 "$_num1 + $_num2 = ?",
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 8),
               TextFormField(

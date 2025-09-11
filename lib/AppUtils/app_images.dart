@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_constants.dart';
 
 class AppImages {

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_home_service_provider_app_clone/AppUtils/app_font_size.dart';
-import 'package:flutter_home_service_provider_app_clone/AppUtils/app_font_weight.dart';
 
 /*
 Title: AppTextStyle Used through App

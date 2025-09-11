@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_images.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Screens/Onboarding/welcome_to_fixit_screen.dart';
 
@@ -100,9 +101,12 @@ class _SplashScreenState extends State<SplashScreen>
                       children: [
                         TextSpan(text: 'Made with '),
                         WidgetSpan(
-                          child: Icon(Icons.favorite, color: Colors.redAccent, size: 16),
+                          child: Icon(Icons.favorite,
+                              color: Colors.redAccent, size: 16),
                         ),
-                        TextSpan(text: ' by Department of IT, Tripura University'),
+                        TextSpan(
+                            text:
+                                ' by Department of IT, Tripura University'),
                       ],
                     ),
                   ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_colors.dart';
-import 'package:flutter_home_service_provider_app_clone/AppUtils/app_strings.dart';
 
 class MockPaymentScreen extends StatelessWidget {
   const MockPaymentScreen({super.key});
