@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_colors.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_images.dart';
@@ -20,6 +21,23 @@ class ServiceSeekerProfileScreen extends StatefulWidget {
 }
 
 class _ServiceSeekerProfileState extends State<ServiceSeekerProfileScreen> {
+  String? _userName;
+
+  @override
+  void initState() {
+    super.initState();
+    _getUserName();
+  }
+
+  void _getUserName() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && user.email != null) {
+      setState(() {
+        _userName = user.email!.split('@')[0];
+      });
+    }
+  }
+
   void _showConfirmationDialog() {
     showDialog(
       context: context,
@@ -122,7 +140,7 @@ class _ServiceSeekerProfileState extends State<ServiceSeekerProfileScreen> {
               ),
             ),
             Text(
-              AppStrings.diptaman,
+              _userName ?? 'No Name',
               style:
                   AppTextStyle.textStyle.copyWith(fontWeight: FontWeight.w600),
             ),
@@ -255,9 +273,9 @@ class _ServiceSeekerProfileState extends State<ServiceSeekerProfileScreen> {
                     const SizedBox(
                       width: 3,
                     ),
-                    const Text(
-                      AppStrings.diptaman,
-                      style: TextStyle(
+                    Text(
+                      _userName ?? 'No Name',
+                      style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 18,
                         color: Colors.blue,
