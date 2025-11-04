@@ -17,9 +17,13 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final GlobalKey<FormState> _userFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _workerFormKey = GlobalKey<FormState>();
+  final TextEditingController userEmailController = TextEditingController();
+  final TextEditingController userPasswordController = TextEditingController();
+  final TextEditingController workerEmailController = TextEditingController();
+  final TextEditingController workerPasswordController =
+      TextEditingController();
   final TextEditingController captchaController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -40,8 +44,14 @@ class _LoginScreenState extends State<LoginScreen> {
     _captchaAnswer = _num1 + _num2;
   }
 
-  Future<void> _submitLogin() async {
-    if (_formKey.currentState!.validate()) {
+  Future<void> _submitLogin(bool isUser) async {
+    final formKey = isUser ? _userFormKey : _workerFormKey;
+    final emailController =
+        isUser ? userEmailController : workerEmailController;
+    final passwordController =
+        isUser ? userPasswordController : workerPasswordController;
+
+    if (formKey.currentState!.validate()) {
       int? enteredCaptcha = int.tryParse(captchaController.text.trim());
 
       if (enteredCaptcha != _captchaAnswer) {
@@ -92,7 +102,9 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _forgotPassword() async {
+  Future<void> _forgotPassword(bool isUser) async {
+    final emailController =
+        isUser ? userEmailController : workerEmailController;
     if (emailController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -133,24 +145,55 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 24),
-          child: Image.asset(AppImages.logofixitImg),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 24),
+            child: Image.asset(AppImages.logofixitImg),
+          ),
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'User Login'),
+              Tab(text: 'Worker Login'),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            _buildLoginForm(isUser: true),
+            _buildLoginForm(isUser: false),
+          ],
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
+    );
+  }
+
+  Widget _buildLoginForm({required bool isUser}) {
+    final formKey = isUser ? _userFormKey : _workerFormKey;
+    final emailController =
+        isUser ? userEmailController : workerEmailController;
+    final passwordController =
+        isUser ? userPasswordController : workerPasswordController;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
+      child: Container(
+        padding: const EdgeInsets.all(24.0),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(12.0),
+        ),
         child: Form(
-          key: _formKey,
+          key: formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Center(
+              Center(
                 child: Text(
-                  AppStrings.enterEmailOr,
-                  style: TextStyle(
+                  isUser ? 'User Login' : 'Worker Login',
+                  style: const TextStyle(
                     fontSize: 24,
                     color: Colors.black87,
                     fontWeight: FontWeight.w600,
@@ -190,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: _forgotPassword,
+                  onPressed: () => _forgotPassword(isUser),
                   child: const Text(
                     'Forgot Password?',
                     style: TextStyle(
@@ -230,7 +273,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 30),
               InkWell(
-                onTap: _submitLogin,
+                onTap: () => _submitLogin(isUser),
                 child: const ButtonStyleWidget(
                   title: AppStrings.signIn,
                   colors: AppColors.blueColors,
