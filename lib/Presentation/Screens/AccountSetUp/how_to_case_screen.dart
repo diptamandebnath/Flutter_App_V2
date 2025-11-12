@@ -1,7 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_colors.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_images.dart';
-import 'package:flutter_home_service_provider_app_clone/AppUtils/app_strings.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_text_style.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Widgets/bottom_navigation_bar_widget.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Widgets/button_style_widget.dart';
@@ -15,7 +15,7 @@ class HowToCaseScreen extends StatefulWidget {
 }
 
 class _HowToCaseState extends State<HowToCaseScreen> {
-  String _selectedPricingMethod = AppStrings.hourlyfee;
+  String _selectedPricingMethod = 'hourlyfee';
   final TextEditingController _hourlyFeeController = TextEditingController();
   final TextEditingController _flatFeeController = TextEditingController();
   final TextEditingController _additionalInfoController =
@@ -45,26 +45,26 @@ class _HowToCaseState extends State<HowToCaseScreen> {
               size: 50,
             ),
             const SizedBox(height: 20),
-            const Text(
-              AppStrings.appReceived,
-              style: TextStyle(
+            Text(
+              'appReceived'.tr(),
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 10),
-            const Text(
-              AppStrings.yourApp,
+            Text(
+              'yourApp'.tr(),
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 20),
             InkWell(
               onTap: () {
                 navigateToAnotherScreen();
               },
-              child: const ButtonStyleWidget(
-                title: AppStrings.home,
+              child: ButtonStyleWidget(
+                title: 'home'.tr(),
                 colors: AppColors.blueColors,
               ),
             ),
@@ -109,45 +109,45 @@ class _HowToCaseState extends State<HowToCaseScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                AppStrings.pricingAndrate,
+                'pricingAndrate'.tr(),
                 style: AppTextStyle.textStyle,
               ),
               const SizedBox(height: 20),
-              const Text(
-                AppStrings.howdoYoucost,
-                style: TextStyle(
+              Text(
+                'howdoYoucost'.tr(),
+                style: const TextStyle(
                   fontSize: 16,
                 ),
               ),
               const SizedBox(height: 20),
               PricingOptionWidget(
-                title: AppStrings.hourlyfee,
+                title: 'hourlyfee'.tr(),
                 imageUrl: AppImages.hourlyfeeImg,
-                isSelected: _selectedPricingMethod == AppStrings.hourlyfee,
+                isSelected: _selectedPricingMethod == 'hourlyfee',
                 controller: _hourlyFeeController,
                 unit: '/h',
                 onTap: () {
                   setState(() {
-                    _selectedPricingMethod = AppStrings.hourlyfee;
+                    _selectedPricingMethod = 'hourlyfee';
                   });
                 },
               ),
               PricingOptionWidget(
-                title: AppStrings.flatfee,
+                title: 'flatfee'.tr(),
                 imageUrl: AppImages.flatfeeImg,
-                isSelected: _selectedPricingMethod == AppStrings.flatfee,
+                isSelected: _selectedPricingMethod == 'flatfee',
                 controller: _flatFeeController,
                 unit: '',
                 onTap: () {
                   setState(() {
-                    _selectedPricingMethod = AppStrings.flatfee;
+                    _selectedPricingMethod = 'flatfee';
                   });
                 },
               ),
               const SizedBox(height: 20),
-              const Text(
-                AppStrings.moreinformation,
-                style: TextStyle(
+              Text(
+                'moreinformation'.tr(),
+                style: const TextStyle(
                   fontSize: 16,
                 ),
               ),
@@ -155,9 +155,9 @@ class _HowToCaseState extends State<HowToCaseScreen> {
               TextField(
                 controller: _additionalInfoController,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: AppStrings.writeHere,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  hintText: 'writeHere'.tr(),
                 ),
               ),
               const SizedBox(
@@ -165,8 +165,8 @@ class _HowToCaseState extends State<HowToCaseScreen> {
               ),
               InkWell(
                 onTap: _showConfirmationDialog,
-                child: const ButtonStyleWidget(
-                  title: AppStrings.submit,
+                child: ButtonStyleWidget(
+                  title: 'submit'.tr(),
                   colors: AppColors.blueColors,
                 ),
               ),

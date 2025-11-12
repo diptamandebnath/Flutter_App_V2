@@ -1,6 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_images.dart';
-import 'package:flutter_home_service_provider_app_clone/AppUtils/app_strings.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_text_style.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Screens/Auth/login_screen.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Widgets/button_style_widget.dart';
@@ -22,24 +22,24 @@ class _WelcomeToFixitState extends State<WelcomeToFixitScreen> {
   final List<Widget> _pages = [
     const ItBoxWidget(
       img: AppImages.welcomeToFixItImg,
-      title: AppStrings.welcome,
-      text1: AppStrings.discover,
-      text2: AppStrings.reliability,
-      text3: AppStrings.serviceNee,
+      title: 'welcome',
+      text1: 'discover',
+      text2: 'reliability',
+      text3: 'serviceNee',
     ),
     const ItBoxWidget(
       img: AppImages.welcomeFindServiceImg,
-      title: AppStrings.findService,
-      text1: AppStrings.browse,
-      text2: AppStrings.services,
-      text3: AppStrings.appliance,
+      title: 'findService',
+      text1: 'browse',
+      text2: 'services',
+      text3: 'appliance',
     ),
     const ItBoxWidget(
       img: AppImages.welcomeTo3Img,
-      title: AppStrings.findService,
-      text1: AppStrings.browse,
-      text2: AppStrings.services,
-      text3: AppStrings.appliance,
+      title: 'findService',
+      text1: 'browse',
+      text2: 'services',
+      text3: 'appliance',
     ),
   ];
   @override
@@ -91,9 +91,9 @@ class _WelcomeToFixitState extends State<WelcomeToFixitScreen> {
                         ),
                       );
                     },
-                    child: const Text(
-                      AppStrings.skip,
-                      style: TextStyle(color: Colors.white),
+                    child: Text(
+                      'skip'.tr(),
+                      style: const TextStyle(color: Colors.white),
                     ),
                   ),
                 ],
@@ -115,8 +115,8 @@ class _WelcomeToFixitState extends State<WelcomeToFixitScreen> {
                   }
                 });
               },
-              child: const ButtonStyleWidget(
-                title: AppStrings.next,
+              child: ButtonStyleWidget(
+                title: 'next'.tr(),
                 colors: Colors.deepPurple,
               ),
             ),
@@ -161,22 +161,22 @@ class ItBoxWidget extends StatelessWidget {
             height: 20,
           ),
           Text(
-            title,
+            title.tr(),
             style: AppTextStyle.welcomeStyle,
           ),
           const SizedBox(
             height: 16,
           ),
           Text(
-            text1,
+            text1.tr(),
             style: AppTextStyle.welcomeSubStyle,
           ),
           Text(
-            text2,
+            text2.tr(),
             style: AppTextStyle.welcomeSubStyle,
           ),
           Text(
-            text3,
+            text3.tr(),
             style: AppTextStyle.welcomeSubStyle,
           ),
           const SizedBox(

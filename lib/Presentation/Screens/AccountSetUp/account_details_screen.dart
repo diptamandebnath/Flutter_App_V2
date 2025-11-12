@@ -1,7 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_colors.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_images.dart';
-import 'package:flutter_home_service_provider_app_clone/AppUtils/app_strings.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_text_style.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Screens/AccountSetUp/how_to_case_screen.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Widgets/button_style_widget.dart';
@@ -45,36 +45,36 @@ class _AccountDetailsState extends State<AccountDetailScreen> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Text(
-              AppStrings.selectPaymentMethod,
+              'selectPaymentMethod'.tr(),
               style: AppTextStyle.textStyle,
             ),
             const SizedBox(height: 20),
             TextFromFieldWidget(
               controller: ownerControllerName,
-              hintText: AppStrings.ownerName,
+              hintText: 'ownerName'.tr(),
               colors: Colors.black,
             ),
             const SizedBox(height: 16),
             TextFromFieldWidget(
               controller: nicNumberController,
-              hintText: AppStrings.nICNumber,
+              hintText: 'nICNumber'.tr(),
               colors: Colors.black,
             ),
             const SizedBox(height: 16),
             TextFromFieldWidget(
               controller: phonenumberController,
-              hintText: AppStrings.phoneNumber,
+              hintText: 'phoneNumber'.tr(),
               colors: Colors.black,
             ),
             const SizedBox(height: 16),
             Text(
-              AppStrings.nICExpirydate,
+              'nICExpirydate'.tr(),
               style: AppTextStyle.textStyle
                   .copyWith(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             TextFromFieldWidget(
               controller: nicExpiryController,
-              hintText: AppStrings.dateFormat,
+              hintText: 'dateFormat'.tr(),
               colors: Colors.black,
             ),
             const SizedBox(
@@ -88,8 +88,8 @@ class _AccountDetailsState extends State<AccountDetailScreen> {
                       builder: (context) => const HowToCaseScreen()),
                 );
               },
-              child: const ButtonStyleWidget(
-                title: AppStrings.next,
+              child: ButtonStyleWidget(
+                title: 'next'.tr(),
                 colors: AppColors.blueColors,
               ),
             ),

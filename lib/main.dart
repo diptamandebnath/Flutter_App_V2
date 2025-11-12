@@ -1,10 +1,12 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_home_service_provider_app_clone/AppUtils/app_strings.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Screens/Splash/splash_screen.dart';
+import 'package:get/get.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
   await Firebase.initializeApp(
     options: const FirebaseOptions(
       apiKey: "AIzaSyCxD2jQiarnYvRIjin6N2VhNSdibYH5wHc",
@@ -16,9 +18,17 @@ void main() async {
       measurementId: "G-S52CFK8RVX",
     ),
   );
-  runApp(const MyApp());
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [Locale('en'), Locale('bn'), Locale('hi')],
+      path: 'translations',
+      fallbackLocale: const Locale('en'),
+      startLocale: const Locale('en'),
+      assetLoader: const RootBundleAssetLoader(),
+      child: const MyApp(),
+    ),
+  );
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -26,9 +36,12 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: AppStrings.appName,
+    return GetMaterialApp(
+      title: 'Fixit',
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,

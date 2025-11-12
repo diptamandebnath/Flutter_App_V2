@@ -1,9 +1,9 @@
 import 'dart:math';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_colors.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_images.dart';
-import 'package:flutter_home_service_provider_app_clone/AppUtils/app_strings.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Screens/Auth/signup_screen.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Screens/Home/home_page_screen.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Widgets/button_style_widget.dart';
@@ -56,8 +56,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (enteredCaptcha != _captchaAnswer) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Incorrect CAPTCHA answer"),
+          SnackBar(
+            content: Text("incorrectCaptcha".tr()),
             backgroundColor: Colors.orange,
           ),
         );
@@ -81,16 +81,16 @@ class _LoginScreenState extends State<LoginScreen> {
         String errorMessage;
         switch (e.code) {
           case 'user-not-found':
-            errorMessage = 'No user found with that email.';
+            errorMessage = 'noUserEmail'.tr();
             break;
           case 'wrong-password':
-            errorMessage = 'Incorrect password.';
+            errorMessage = 'incorrectPass'.tr();
             break;
           case 'invalid-email':
-            errorMessage = 'The email address is not valid.';
+            errorMessage = 'invalidEmail'.tr();
             break;
           default:
-            errorMessage = e.message ?? "An unknown error occurred";
+            errorMessage = e.message ?? "unknownError".tr();
         }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -107,8 +107,8 @@ class _LoginScreenState extends State<LoginScreen> {
         isUser ? userEmailController : workerEmailController;
     if (emailController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please enter your email to reset your password."),
+        SnackBar(
+          content: Text("enterEmailToReset".tr()),
           backgroundColor: Colors.orange,
         ),
       );
@@ -117,8 +117,8 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await _auth.sendPasswordResetEmail(email: emailController.text.trim());
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Password reset link sent to your email."),
+        SnackBar(
+          content: Text("passResetLink".tr()),
           backgroundColor: Colors.green,
         ),
       );
@@ -126,13 +126,13 @@ class _LoginScreenState extends State<LoginScreen> {
       String errorMessage;
       switch (e.code) {
         case 'user-not-found':
-          errorMessage = 'No user found with that email.';
+          errorMessage = 'noUserEmail'.tr();
           break;
         case 'invalid-email':
-          errorMessage = 'The email address is not valid.';
+          errorMessage = 'invalidEmail'.tr();
           break;
         default:
-          errorMessage = "An error occurred. Please try again later.";
+          errorMessage = "errorOccurred".tr();
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -153,10 +153,10 @@ class _LoginScreenState extends State<LoginScreen> {
             padding: const EdgeInsets.only(left: 24),
             child: Image.asset(AppImages.logofixitImg),
           ),
-          bottom: const TabBar(
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'User Login'),
-              Tab(text: 'Worker Login'),
+              Tab(text: 'userLogin'.tr()),
+              Tab(text: 'workerLogin'.tr()),
             ],
           ),
         ),
@@ -192,7 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               Center(
                 child: Text(
-                  isUser ? 'User Login' : 'Worker Login',
+                  isUser ? 'userLogin'.tr() : 'workerLogin'.tr(),
                   style: const TextStyle(
                     fontSize: 24,
                     color: Colors.black87,
@@ -203,14 +203,14 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 30),
               TextFormFieldBoxUserWidget(
                 controller: emailController,
-                hintText: AppStrings.enterEmail,
+                hintText: 'enterEmail'.tr(),
                 prefixIcon: Icons.mail_rounded,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
+                    return 'enterYourEmail'.tr();
                   }
                   if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
-                    return 'Please enter a valid email';
+                    return 'enterValidEmail'.tr();
                   }
                   return null;
                 },
@@ -218,14 +218,14 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16),
               TextFromFieldBoxPassword(
                 controller: passwordController,
-                hintText: AppStrings.enterPass,
+                hintText: 'enterPass'.tr(),
                 prefixIcon: Icons.lock,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your password';
+                    return 'enterYourPass'.tr();
                   }
                   if (value.length < 6) {
-                    return 'Password must be at least 6 characters';
+                    return 'passMin6'.tr();
                   }
                   return null;
                 },
@@ -234,9 +234,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () => _forgotPassword(isUser),
-                  child: const Text(
-                    'Forgot Password?',
-                    style: TextStyle(
+                  child: Text(
+                    'forgotPassword'.tr(),
+                    style: const TextStyle(
                       color: AppColors.blueColors,
                       fontWeight: FontWeight.w600,
                     ),
@@ -255,17 +255,17 @@ class _LoginScreenState extends State<LoginScreen> {
               TextFormField(
                 controller: captchaController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  hintText: "Enter your answer",
-                  prefixIcon: Icon(Icons.calculate),
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  hintText: "enterYourAns".tr(),
+                  prefixIcon: const Icon(Icons.calculate),
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please answer the CAPTCHA';
+                    return 'ansCaptcha'.tr();
                   }
                   if (int.tryParse(value.trim()) == null) {
-                    return 'Enter a valid number';
+                    return 'enterValidNum'.tr();
                   }
                   return null;
                 },
@@ -274,8 +274,8 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 30),
               InkWell(
                 onTap: () => _submitLogin(isUser),
-                child: const ButtonStyleWidget(
-                  title: AppStrings.signIn,
+                child: ButtonStyleWidget(
+                  title: 'signIn'.tr(),
                   colors: AppColors.blueColors,
                 ),
               ),
@@ -289,17 +289,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     );
                   },
-                  child: const Text.rich(
+                  child: Text.rich(
                     TextSpan(
-                      text: AppStrings.newTo,
-                      style: TextStyle(
+                      text: 'newTo'.tr(),
+                      style: const TextStyle(
                           color: Colors.grey,
                           fontSize: 18,
                           fontWeight: FontWeight.w500),
                       children: [
                         TextSpan(
-                          text: AppStrings.signUpNow,
-                          style: TextStyle(
+                          text: 'signUpNow'.tr(),
+                          style: const TextStyle(
                             color: Colors.blue,
                             fontSize: 18,
                             fontWeight: FontWeight.w600,

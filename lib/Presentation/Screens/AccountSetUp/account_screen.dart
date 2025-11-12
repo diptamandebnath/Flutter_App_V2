@@ -1,7 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_colors.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_images.dart';
-import 'package:flutter_home_service_provider_app_clone/AppUtils/app_strings.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Screens/AccountSetUp/account_details_screen.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Widgets/button_style_widget.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Widgets/selected_payment_method_widget.dart';
@@ -52,8 +52,8 @@ class _AccountScreensState extends State<AccountScreen> {
                   ),
                 );
               },
-              child: const ButtonStyleWidget(
-                title: AppStrings.next,
+              child: ButtonStyleWidget(
+                title: 'next'.tr(),
                 colors: AppColors.blueColors,
               ),
             ),

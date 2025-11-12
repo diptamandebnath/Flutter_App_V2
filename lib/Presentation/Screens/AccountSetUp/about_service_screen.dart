@@ -1,7 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_colors.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_images.dart';
-import 'package:flutter_home_service_provider_app_clone/AppUtils/app_strings.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_text_style.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Screens/AccountSetUp/service_working_hours_screen.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Widgets/button_style_widget.dart';
@@ -16,37 +16,37 @@ class AboutServiceScreen extends StatefulWidget {
 
 class _AboutServiceState extends State<AboutServiceScreen> {
   List<String> services = [
-    AppStrings.acService,
-    AppStrings.carService,
-    AppStrings.busService,
-    AppStrings.plumberService,
-    AppStrings.electricianService,
-    AppStrings.cleaningService,
-    AppStrings.carpenterService,
-    AppStrings.gardeningService,
-    AppStrings.pestControlService,
-    AppStrings.paintingService
+    'acService',
+    'carService',
+    'busService',
+    'plumberService',
+    'electricianService',
+    'cleaningService',
+    'carpenterService',
+    'gardeningService',
+    'pestControlService',
+    'paintingService'
   ];
   List<String> experience = [
-    AppStrings.noExp,
-    AppStrings.lessExp,
-    AppStrings.oneyearExp,
-    AppStrings.twoExp,
-    AppStrings.threeExp,
-    AppStrings.fourExp,
-    AppStrings.fievExp,
-    AppStrings.tenExp,
+    'noExp',
+    'lessExp',
+    'oneyearExp',
+    'twoExp',
+    'threeExp',
+    'fourExp',
+    'fievExp',
+    'tenExp',
   ];
   List<String> area = [
-    AppStrings.bhat,
-    AppStrings.hansol,
-    AppStrings.maninagar,
-    AppStrings.naroda,
-    AppStrings.navrangpura,
-    AppStrings.nikol,
-    AppStrings.vasna,
-    AppStrings.vastral,
-    AppStrings.vastrapur,
+    'bhat',
+    'hansol',
+    'maninagar',
+    'naroda',
+    'navrangpura',
+    'nikol',
+    'vasna',
+    'vastral',
+    'vastrapur',
   ];
   @override
   Widget build(BuildContext context) {
@@ -75,7 +75,7 @@ class _AboutServiceState extends State<AboutServiceScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                AppStrings.selectaService,
+                'selectaService'.tr(),
                 style: AppTextStyle.textStyle,
               ),
               const SizedBox(
@@ -83,21 +83,21 @@ class _AboutServiceState extends State<AboutServiceScreen> {
               ),
               DropdownMenuBoxWidget(
                 itemList: services,
-                hintText: AppStrings.selectaService,
+                hintText: 'selectaService'.tr(),
               ),
               const SizedBox(
                 height: 16,
               ),
               DropdownMenuBoxWidget(
                 itemList: experience,
-                hintText: AppStrings.selectYourExperience,
+                hintText: 'selectYourExperience'.tr(),
               ),
               const SizedBox(
                 height: 16,
               ),
               DropdownMenuBoxWidget(
                 itemList: area,
-                hintText: AppStrings.selectServiceArea,
+                hintText: 'selectServiceArea'.tr(),
               ),
               const SizedBox(
                 height: 126,
@@ -111,8 +111,8 @@ class _AboutServiceState extends State<AboutServiceScreen> {
                     ),
                   );
                 },
-                child: const ButtonStyleWidget(
-                  title: AppStrings.next,
+                child: ButtonStyleWidget(
+                  title: 'next'.tr(),
                   colors: AppColors.blueColors,
                 ),
               ),

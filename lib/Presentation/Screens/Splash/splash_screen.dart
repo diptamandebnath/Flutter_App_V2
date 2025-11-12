@@ -1,8 +1,9 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_images.dart';
-import 'package:flutter_home_service_provider_app_clone/Presentation/Screens/Onboarding/welcome_to_fixit_screen.dart';
+import 'package:flutter_home_service_provider_app_clone/Presentation/Screens/Onboarding/language_selection_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -20,7 +21,7 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
     _startAnimation();
-    _navigateToWelcomeScreen();
+    _navigateToLanguageSelectionScreen();
   }
 
   void _startAnimation() {
@@ -32,12 +33,13 @@ class _SplashScreenState extends State<SplashScreen>
     _animationController.forward();
   }
 
-  void _navigateToWelcomeScreen() {
+  void _navigateToLanguageSelectionScreen() {
     Timer(const Duration(seconds: 3), () {
+      context.setLocale(const Locale('en'));
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const WelcomeToFixitScreen(),
+          builder: (context) => const LanguageSelectionScreen(),
         ),
       );
     });
