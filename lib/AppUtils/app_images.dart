@@ -163,4 +163,5 @@ class AppImages {
   static const String flatfeeImg = '$baseImagePath/flatfee.png';
   static const String locationaccessImg = '$baseImagePath/locationaccess.png';
   static const String livelocationImg = '$baseImagePath/livelocation.png';
+  static const String aadhaarLogoImg = '$baseImagePath/aadhaar_logo.png';
 }

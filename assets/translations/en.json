@@ -88,5 +88,17 @@
   "submit": "Submit",
   "appReceived": "Application Received!",
   "yourApp": "Your application has been received and is being reviewed.",
-  "home": "Home"
+  "home": "Home",
+  "loginWithAadhaar": "Login with Aadhaar",
+  "aadhaarLogin": "Aadhaar Login",
+  "uploadAadhaar": "Upload Aadhaar eKYC XML",
+  "login": "Login",
+  "or": "or",
+  "enterAadhaar": "Enter your Aadhaar Number",
+  "pleaseEnterAadhaar": "Please enter your Aadhaar number",
+  "aadhaarMustBe12Digits": "Aadhaar number must be 12 digits",
+  "sendOtp": "Send OTP",
+  "enterOtp": "Enter OTP",
+  "pleaseEnterOtp": "Please enter the OTP",
+  "otpMustBe6Digits": "OTP must be 6 digits"
 }

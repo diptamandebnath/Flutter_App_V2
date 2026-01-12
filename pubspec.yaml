@@ -19,6 +19,8 @@ dependencies:
   firebase_auth: ^6.0.2
   easy_localization: ^3.0.7
   get: ^4.6.6
+  file_picker: ^8.0.0+1
+  webview_flutter: ^4.13.1
 
 dev_dependencies:
   flutter_test:
@@ -29,5 +31,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
-    - assets/sounds/notification.mp3
+    - assets/sounds/
     - assets/translations/

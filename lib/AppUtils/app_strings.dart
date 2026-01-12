@@ -313,4 +313,25 @@ class AppStrings {
   static const int rating94 = 94;
   static const int rating44 = 44;
   static const int rating263 = 263;
+
+  static const String loginWithAadhaar = 'Login with Aadhaar';
+  static const String workerLogin = 'Worker Login';
+  static const String userLogin = 'User Login';
+  static const String incorrectCaptcha = 'Incorrect Captcha';
+  static const String noUserEmail = 'No user found for that email.';
+  static const String incorrectPass = 'Wrong password provided for that user.';
+  static const String invalidEmail = 'The email address is badly formatted.';
+  static const String unknownError = 'An unknown error occurred.';
+  static const String enterEmailToReset =
+      'Enter your email to receive a password reset link.';
+  static const String passResetLink = 'Password reset link sent to your email.';
+  static const String errorOccurred = 'An error occurred. Please try again later.';
+  static const String enterValidEmail = 'Please enter a valid email address.';
+  static const String passMin6 = 'Password must be at least 6 characters long.';
+  static const String enterYourAns = "Enter your answer";
+  static const String ansCaptcha = 'Please answer the captcha.';
+  static const String enterValidNum = 'Please enter a valid number.';
+  static const String aadhaarLogin = "Aadhaar eKYC Login";
+  static const String uploadAadhaar = "Upload Aadhaar eKYC XML";
+  static const String login = "Login";
 }
