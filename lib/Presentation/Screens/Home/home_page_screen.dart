@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
-import 'package:audioplayers/audioplayers.dart'; // ✅ Import audioplayers
+// ✅ Import audioplayers
 
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_colors.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_images.dart';
@@ -15,7 +14,6 @@ import 'package:flutter_home_service_provider_app_clone/Presentation/Screens/Ord
 import 'package:flutter_home_service_provider_app_clone/Presentation/Widgets/service_card_widget.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Widgets/service_provider_card_widget.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Screens/Services/api_service.dart';
-import '../ServiceProvider/service_provider_detail_screen.dart';
 
 class HomePageScreen extends StatefulWidget {
   final bool showLoginSuccessMessage;

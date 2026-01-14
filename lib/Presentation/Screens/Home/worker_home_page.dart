@@ -16,22 +16,58 @@ class WorkerHomePage extends StatefulWidget {
 
 class _WorkerHomePageState extends State<WorkerHomePage> {
   bool isAvailable = true;
-  bool showHeaderNotification = false;
   final AudioPlayer _audioPlayer = AudioPlayer();
   Map<String, dynamic>? _workerData;
   bool _isLoading = true;
+  bool showHeaderNotification = false;
+  DocumentSnapshot? _latestRequest;
+  StreamSubscription? _serviceRequestSubscription;
 
   @override
   void initState() {
     super.initState();
-    _fetchWorkerData();
-    Timer(const Duration(seconds: 5), () async {
-      if (mounted) {
-        setState(() {
-          showHeaderNotification = true;
-        });
-        await _audioPlayer.play(AssetSource('sounds/notification.mp3'));
+    _fetchWorkerData().then((_) {
+      if (_workerData != null) {
+        _listenForServiceRequests();
       }
+    });
+  }
+
+  @override
+  void dispose() {
+    _serviceRequestSubscription?.cancel();
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  void _listenForServiceRequests() {
+    if (_workerData?['service'] == null) return;
+
+    final query = FirebaseFirestore.instance
+        .collection('service_requests')
+        .where('serviceName', isEqualTo: _workerData!['service'])
+        .where('status', isEqualTo: 'pending')
+        .orderBy('timestamp', descending: true)
+        .limit(1);
+
+    _serviceRequestSubscription = query.snapshots().listen((snapshot) {
+      if (snapshot.docs.isNotEmpty) {
+        final newRequest = snapshot.docs.first;
+        // Only show notification if it's a new request we haven't notified for.
+        if (!showHeaderNotification || (_latestRequest?.id != newRequest.id)) {
+          setState(() {
+            _latestRequest = newRequest;
+            showHeaderNotification = true;
+          });
+          _audioPlayer.play(AssetSource('sounds/notification.mp3'));
+        }
+      }
+    });
+  }
+
+  void dismissNotification() {
+    setState(() {
+      showHeaderNotification = false;
     });
   }
 
@@ -66,35 +102,138 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
     }
   }
 
-  void dismissNotification() {
-    setState(() {
-      showHeaderNotification = false;
-    });
+  Future<void> _confirmBooking(
+      String serviceRequestId, Map<String, dynamic> requestData, double? price) async {
+    final firestore = FirebaseFirestore.instance;
+
+    try {
+      await firestore.runTransaction((transaction) async {
+        final serviceRequestRef =
+            firestore.collection('service_requests').doc(serviceRequestId);
+        final bookingRef = firestore.collection('bookings').doc();
+
+        final serviceRequestSnapshot = await transaction.get(serviceRequestRef);
+        if (!serviceRequestSnapshot.exists ||
+            serviceRequestSnapshot.data()!['status'] != 'pending') {
+          throw Exception('This job is no longer available.');
+        }
+
+        transaction.update(serviceRequestRef, {
+          'status': 'accepted',
+          'acceptedBy': widget.aadharNo,
+        });
+
+        transaction.set(bookingRef, {
+          'workerId': widget.aadharNo,
+          'workerName': _workerData?['name'] ?? 'N/A',
+          'userId': requestData['userId'],
+          'serviceRequestId': serviceRequestId,
+          'serviceName': requestData['serviceName'],
+          'status': 'accepted',
+          'regularPrice': requestData['price'],
+          'acceptedPrice': price ?? requestData['price'],
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Booking confirmed and user notified!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      dismissNotification(); // Dismiss header after accepting
+    } catch (e) {
+      print('Error confirming booking: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
-  void _showAcceptanceDialog() {
+  void _showAcceptanceDialog(
+      String serviceRequestId, Map<String, dynamic> requestData) {
+    int selectedOption = 1;
+    final priceController = TextEditingController();
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirm Acceptance'),
-          content: _AcceptanceDialogContent(),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: const Text('Confirm'),
-              onPressed: () {
-                // Logic to handle confirmation based on selected price will go here
-                Navigator.of(context).pop();
-                dismissNotification();
-              },
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Confirm Acceptance'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  RadioListTile<int>(
+                    title: const Text('Accept with regular price'),
+                    value: 1,
+                    groupValue: selectedOption,
+                    onChanged: (int? value) {
+                      setState(() {
+                        selectedOption = value!;
+                      });
+                    },
+                  ),
+                  RadioListTile<int>(
+                    title: const Text('Accept with lesser price'),
+                    value: 2,
+                    groupValue: selectedOption,
+                    onChanged: (int? value) {
+                      setState(() {
+                        selectedOption = value!;
+                      });
+                    },
+                  ),
+                  if (selectedOption == 2)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24.0, vertical: 8.0),
+                      child: TextFormField(
+                        controller: priceController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Enter your price',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                ElevatedButton(
+                  child: const Text('Confirm'),
+                  onPressed: () {
+                    double? customPrice;
+                    if (selectedOption == 2) {
+                      customPrice = double.tryParse(priceController.text);
+                      if (customPrice == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please enter a valid price.'),
+                            backgroundColor: Colors.orange,
+                          ),
+                        );
+                        return;
+                      }
+                    }
+                    _confirmBooking(serviceRequestId, requestData, customPrice);
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -102,6 +241,9 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final latestRequestData =
+        _latestRequest?.data() as Map<String, dynamic>? ?? {};
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -113,7 +255,11 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
                 height: 40,
               ),
             ),
-            title: const Text("Worker Dashboard"),
+            centerTitle: true,
+            title: const Text(
+              "Worker Dashboard",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             actions: [
               IconButton(
                 onPressed: () {
@@ -199,7 +345,7 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
                     ),
             ),
           ),
-          if (showHeaderNotification)
+          if (showHeaderNotification && _latestRequest != null)
             SliverPersistentHeader(
               pinned: true,
               delegate: _StickyNotificationDelegate(
@@ -237,17 +383,13 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      const Text(
-                        'Order By: John Doe',
-                        style: TextStyle(fontSize: 14, color: Colors.black54),
+                      Text(
+                        'Order By: ${latestRequestData['userName'] ?? 'N/A'}',
+                        style: const TextStyle(fontSize: 14, color: Colors.black54),
                       ),
-                      const Text(
-                        'Time: 10:30 AM, 2025-09-06',
-                        style: TextStyle(fontSize: 14, color: Colors.black54),
-                      ),
-                      const Text(
-                        'Service: AC Repair',
-                        style: TextStyle(fontSize: 14, color: Colors.black54),
+                      Text(
+                        'Service: ${latestRequestData['serviceName'] ?? 'N/A'}',
+                        style: const TextStyle(fontSize: 14, color: Colors.black54),
                       ),
                       const SizedBox(height: 16),
                       Row(
@@ -261,7 +403,10 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 20, vertical: 10),
                             ),
-                            onPressed: _showAcceptanceDialog,
+                            onPressed: () {
+                              _showAcceptanceDialog(
+                                  _latestRequest!.id, latestRequestData);
+                            },
                             child: const Text('Accept',
                                 style: TextStyle(
                                     fontSize: 14, color: Colors.white)),
@@ -303,36 +448,67 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: 5, // Placeholder
-                        itemBuilder: (context, index) {
-                          return Card(
-                            elevation: 3,
-                            margin: const EdgeInsets.only(bottom: 16),
-                            child: ListTile(
-                              leading: const Icon(
-                                Icons.work,
-                                color: AppColors.blueColor,
-                              ),
-                              title: Text(
-                                  "Job Request #${index + 1}"), // Placeholder
-                              subtitle: const Text(
-                                  "Fix wiring issues in the living room."), // Placeholder
-                              trailing: TextButton(
-                                onPressed: () {
-                                  // TODO: Navigate to job details screen
-                                },
-                                child: const Text(
-                                  "View Details",
-                                  style: TextStyle(color: AppColors.blueColor),
-                                ),
-                              ),
+                      _isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : StreamBuilder<QuerySnapshot>(
+                              stream: FirebaseFirestore.instance
+                                  .collection('service_requests')
+                                  .where('serviceName',
+                                      isEqualTo: _workerData?['service'])
+                                  .where('status', isEqualTo: 'pending')
+                                  .snapshots(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                }
+
+                                if (snapshot.hasError) {
+                                  return Center(
+                                      child: Text('Error: ${snapshot.error}'));
+                                }
+
+                                if (!snapshot.hasData ||
+                                    snapshot.data!.docs.isEmpty) {
+                                  return const Center(
+                                      child: Text(
+                                          'No new job requests at the moment.'));
+                                }
+
+                                return ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: snapshot.data!.docs.length,
+                                  itemBuilder: (context, index) {
+                                    final request = snapshot.data!.docs[index];
+                                    final data =
+                                        request.data() as Map<String, dynamic>;
+
+                                    return Card(
+                                      elevation: 3,
+                                      margin: const EdgeInsets.only(bottom: 16),
+                                      child: ListTile(
+                                        leading: const Icon(
+                                          Icons.work,
+                                          color: AppColors.blueColor,
+                                        ),
+                                        title: Text(data['serviceName'] ?? 'N/A'),
+                                        subtitle: Text(
+                                            'From: ${data['userName'] ?? 'N/A'}'),
+                                        trailing: ElevatedButton(
+                                          onPressed: () {
+                                            _showAcceptanceDialog(
+                                                request.id, data);
+                                          },
+                                          child: const Text('Accept'),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
                             ),
-                          );
-                        },
-                      ),
                     ],
                   ),
                 ),
@@ -365,57 +541,5 @@ class _StickyNotificationDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(SliverPersistentHeaderDelegate oldDelegate) {
     return true;
-  }
-}
-
-class _AcceptanceDialogContent extends StatefulWidget {
-  @override
-  __AcceptanceDialogContentState createState() =>
-      __AcceptanceDialogContentState();
-}
-
-class __AcceptanceDialogContentState extends State<_AcceptanceDialogContent> {
-  int _selectedOption = 1;
-  final TextEditingController _priceController = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        RadioListTile<int>(
-          title: const Text('Accept with regular price'),
-          value: 1,
-          groupValue: _selectedOption,
-          onChanged: (int? value) {
-            setState(() {
-              _selectedOption = value!;
-            });
-          },
-        ),
-        RadioListTile<int>(
-          title: const Text('Accept with lesser price'),
-          value: 2,
-          groupValue: _selectedOption,
-          onChanged: (int? value) {
-            setState(() {
-              _selectedOption = value!;
-            });
-          },
-        ),
-        if (_selectedOption == 2)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-            child: TextFormField(
-              controller: _priceController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Enter your price',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ),
-      ],
-    );
   }
 }
