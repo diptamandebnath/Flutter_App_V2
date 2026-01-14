@@ -1,9 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:audioplayers/audioplayers.dart';  // ✅ Import audioplayers
+import 'package:audioplayers/audioplayers.dart'; // ✅ Import audioplayers
 
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_colors.dart';
-import 'package:flutter_home_service_provider_app_clone/AppUtils/app_constants.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_images.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_strings.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_text_style.dart';
@@ -15,7 +15,6 @@ import 'package:flutter_home_service_provider_app_clone/Presentation/Screens/Ord
 import 'package:flutter_home_service_provider_app_clone/Presentation/Widgets/service_card_widget.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Widgets/service_provider_card_widget.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Screens/Services/api_service.dart';
-import '../ServiceProvider/service_provider_detail_screen.dart';
 
 class HomePageScreen extends StatefulWidget {
   final bool showLoginSuccessMessage;
@@ -99,7 +98,7 @@ class _HomeContentState extends State<HomeContent> {
   List<String> recommendations = [];
   bool isLoading = true;
   bool showHeaderNotification = false;
-  final AudioPlayer _audioPlayer = AudioPlayer();  // ✅ Audio player instance
+  final AudioPlayer _audioPlayer = AudioPlayer(); // ✅ Audio player instance
 
   @override
   void initState() {
@@ -162,11 +161,15 @@ class _HomeContentState extends State<HomeContent> {
                 children: [
                   const Row(
                     children: [
-                      Icon(Icons.notifications_active, color: AppColors.blueColors, size: 28),
+                      Icon(Icons.notifications_active,
+                          color: AppColors.blueColors, size: 28),
                       SizedBox(width: 8),
                       Text(
                         'New Service Request',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87),
                       ),
                     ],
                   ),
@@ -190,28 +193,35 @@ class _HomeContentState extends State<HomeContent> {
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF0A53DF),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
                         ),
                         onPressed: dismissNotification,
-                        child: const Text('Accept', style: TextStyle(fontSize: 14, color: Colors.white)),
+                        child: const Text('Accept',
+                            style:
+                                TextStyle(fontSize: 14, color: Colors.white)),
                       ),
                       const SizedBox(width: 12),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFE34208),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          backgroundColor: const Color(0xFFE34208),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
                         ),
                         onPressed: dismissNotification,
-                        child: const Text('Reject', style: TextStyle(fontSize: 14, color: Colors.black)),
+                        child: const Text('Reject',
+                            style:
+                                TextStyle(fontSize: 14, color: Colors.black)),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -243,12 +253,16 @@ class _HomeContentState extends State<HomeContent> {
                           right: 0,
                           child: Container(
                             height: 147,
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
                                 begin: Alignment.centerLeft,
                                 end: Alignment.centerRight,
-                                colors: [Colors.deepPurple, AppColors.blueColors],
+                                colors: [
+                                  Colors.deepPurple,
+                                  AppColors.blueColors
+                                ],
                               ),
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -266,7 +280,8 @@ class _HomeContentState extends State<HomeContent> {
                                 SizedBox(height: 2),
                                 Text(
                                   AppStrings.just,
-                                  style: TextStyle(color: Colors.white, fontSize: 16),
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 16),
                                 ),
                               ],
                             ),
@@ -275,7 +290,8 @@ class _HomeContentState extends State<HomeContent> {
                         Positioned(
                           right: 10,
                           top: 22,
-                          child: Image.asset(AppImages.offerIconsImg, height: 150),
+                          child:
+                              Image.asset(AppImages.offerIconsImg, height: 150),
                         ),
                         Positioned(
                           bottom: 0,
@@ -302,15 +318,18 @@ class _HomeContentState extends State<HomeContent> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(AppStrings.popularServices, style: AppTextStyle.textStyle),
+                      Text(AppStrings.popularServices,
+                          style: AppTextStyle.textStyle),
                       TextButton(
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => const ServiceScreens()),
+                            MaterialPageRoute(
+                                builder: (_) => const ServiceScreens()),
                           );
                         },
-                        child: const Text(AppStrings.viewAll, style: TextStyle(color: Colors.blue)),
+                        child: const Text(AppStrings.viewAll,
+                            style: TextStyle(color: Colors.blue)),
                       ),
                     ],
                   ),
@@ -323,7 +342,8 @@ class _HomeContentState extends State<HomeContent> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const ServiceDetailScreen(title: 'Plumbing'),
+                                builder: (_) =>
+                                    const ServiceDetailScreen(title: 'Plumbing'),
                               ),
                             );
                           },
@@ -338,7 +358,8 @@ class _HomeContentState extends State<HomeContent> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const ServiceDetailScreen(title: 'Electric Work'),
+                                builder: (_) => const ServiceDetailScreen(
+                                    title: 'Electric Work'),
                               ),
                             );
                           },
@@ -353,7 +374,8 @@ class _HomeContentState extends State<HomeContent> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const ServiceDetailScreen(title: 'Solar'),
+                                builder: (_) =>
+                                    const ServiceDetailScreen(title: 'Solar'),
                               ),
                             );
                           },
@@ -368,7 +390,8 @@ class _HomeContentState extends State<HomeContent> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const ServiceDetailScreen(title: 'Air Conditioner'),
+                                builder: (_) => const ServiceDetailScreen(
+                                    title: 'Air Conditioner'),
                               ),
                             );
                           },
@@ -384,40 +407,60 @@ class _HomeContentState extends State<HomeContent> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(AppStrings.servicesprovider, style: AppTextStyle.textStyle),
+                      Text(AppStrings.servicesprovider,
+                          style: AppTextStyle.textStyle),
                       TextButton(
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => const ServiceProviderScreens()),
+                            MaterialPageRoute(
+                                builder: (_) => const ServiceProviderScreens()),
                           );
                         },
-                        child: const Text(AppStrings.viewAll, style: TextStyle(color: Colors.blue)),
+                        child: const Text(AppStrings.viewAll,
+                            style: TextStyle(color: Colors.blue)),
                       ),
                     ],
                   ),
                   SizedBox(
                     height: 240,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: AppConstants.serviceProvider.length,
-                      itemBuilder: (context, index) {
-                        final provider = AppConstants.serviceProvider[index];
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ServiceProviderDetailScreen(provide: provider),
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('workers')
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        }
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                        return ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: snapshot.data!.docs
+                              .map((DocumentSnapshot document) {
+                            Map<String, dynamic> data =
+                                document.data()! as Map<String, dynamic>;
+                            return GestureDetector(
+                              onTap: () {
+                                // Navigator.push(
+                                //   context,
+                                //   MaterialPageRoute(
+                                //     builder: (_) => ServiceProviderDetailScreen(
+                                //         provide: data),
+                                //   ),
+                                // );
+                              },
+                              child: ServiceProviderCardWidget(
+                                name: data['name'],
+                                profession: data['service'],
+                                rating: '4.5', // As there is no rating in firestore
+                                imageUrl: data['img'],
                               ),
                             );
-                          },
-                          child: ServiceProviderCardWidget(
-                            name: provider.name.toString(),
-                            profession: provider.profession.toString(),
-                            rating: provider.rating.toString(),
-                            imageUrl: provider.imageUrl.toString(),
-                          ),
+                          }).toList(),
                         );
                       },
                     ),
@@ -442,12 +485,14 @@ class _HomeContentState extends State<HomeContent> {
                   const SizedBox(height: 24),
                   Card(
                     elevation: 2,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Row(
                         children: const [
-                          Icon(Icons.verified_user, color: AppColors.blueColors),
+                          Icon(Icons.verified_user,
+                              color: AppColors.blueColors),
                           SizedBox(width: 12),
                           Expanded(
                             child: Text(
@@ -481,30 +526,33 @@ class _HomeContentState extends State<HomeContent> {
                   isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : Column(
-                    children: recommendations.map((item) {
-                      return Card(
-                        margin: const EdgeInsets.symmetric(vertical: 4),
-                        child: ListTile(
-                          leading: const Icon(Icons.recommend, color: AppColors.blueColors),
-                          title: Text(item),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ServiceDetailScreen(title: item),
+                          children: recommendations.map((item) {
+                            return Card(
+                              margin: const EdgeInsets.symmetric(vertical: 4),
+                              child: ListTile(
+                                leading: const Icon(Icons.recommend,
+                                    color: AppColors.blueColors),
+                                title: Text(item),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          ServiceDetailScreen(title: item),
+                                    ),
+                                  );
+                                },
                               ),
                             );
-                          },
+                          }).toList(),
                         ),
-                      );
-                    }).toList(),
-                  ),
                   const SizedBox(height: 24),
                   Center(
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.blueColors,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
