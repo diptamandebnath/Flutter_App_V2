@@ -53,7 +53,6 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
     _serviceRequestSubscription = query.snapshots().listen((snapshot) {
       if (snapshot.docs.isNotEmpty) {
         final newRequest = snapshot.docs.first;
-        // Only show notification if it's a new request we haven't notified for.
         if (!showHeaderNotification || (_latestRequest?.id != newRequest.id)) {
           setState(() {
             _latestRequest = newRequest;
@@ -84,12 +83,10 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
           _workerData = querySnapshot.docs.first.data();
           _isLoading = false;
         });
-      } else {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
+      } else if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
         print('Worker not found');
       }
     } catch (e) {
@@ -111,6 +108,7 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
         final serviceRequestRef =
             firestore.collection('service_requests').doc(serviceRequestId);
         final bookingRef = firestore.collection('bookings').doc();
+        final notificationRef = firestore.collection('notifications').doc(); // Notification ref
 
         final serviceRequestSnapshot = await transaction.get(serviceRequestRef);
         if (!serviceRequestSnapshot.exists ||
@@ -118,11 +116,13 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
           throw Exception('This job is no longer available.');
         }
 
+        // Update service request
         transaction.update(serviceRequestRef, {
           'status': 'accepted',
           'acceptedBy': widget.aadharNo,
         });
 
+        // Create booking
         transaction.set(bookingRef, {
           'workerId': widget.aadharNo,
           'workerName': _workerData?['name'] ?? 'N/A',
@@ -133,6 +133,15 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
           'regularPrice': requestData['price'],
           'acceptedPrice': price ?? requestData['price'],
           'timestamp': FieldValue.serverTimestamp(),
+        });
+
+        // Create notification for the user
+        transaction.set(notificationRef, {
+          'userId': requestData['userId'],
+          'message':
+              'Your request for ${requestData['serviceName']} has been accepted by ${_workerData?['name'] ?? 'a worker'}.',
+          'timestamp': FieldValue.serverTimestamp(),
+          'isRead': false,
         });
       });
 

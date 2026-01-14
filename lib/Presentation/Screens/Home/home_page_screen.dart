@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-// ✅ Import audioplayers
+import 'dart:async';
+import 'package:audioplayers/audioplayers.dart';
 
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_colors.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_images.dart';
@@ -14,6 +16,7 @@ import 'package:flutter_home_service_provider_app_clone/Presentation/Screens/Ord
 import 'package:flutter_home_service_provider_app_clone/Presentation/Widgets/service_card_widget.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Widgets/service_provider_card_widget.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Screens/Services/api_service.dart';
+import '../ServiceProvider/service_provider_detail_screen.dart';
 
 class HomePageScreen extends StatefulWidget {
   final bool showLoginSuccessMessage;
@@ -96,11 +99,47 @@ class HomeContent extends StatefulWidget {
 class _HomeContentState extends State<HomeContent> {
   List<String> recommendations = [];
   bool isLoading = true;
+  StreamSubscription? _notificationSubscription;
+  final _audioPlayer = AudioPlayer();
 
   @override
   void initState() {
     super.initState();
     fetchRecommendations();
+    _setupNotificationListener();
+  }
+
+  void _setupNotificationListener() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    _notificationSubscription = FirebaseFirestore.instance
+        .collection('service_requests')
+        .where('userId', isEqualTo: user.uid)
+        .where('status', isEqualTo: 'accepted')
+        .snapshots()
+        .listen((snapshot) {
+      for (var change in snapshot.docChanges) {
+        if (change.type == DocumentChangeType.modified) {
+          _showAcceptedNotification();
+          break; // Show only once
+        }
+      }
+    });
+  }
+
+  void _showAcceptedNotification() async {
+    // Play notification sound
+    await _audioPlayer.play(AssetSource('sounds/notification.mp3'));
+
+    // Show snackbar
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Your service request has been accepted!'),
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 5),
+      ),
+    );
   }
 
   void fetchRecommendations() async {
@@ -114,6 +153,13 @@ class _HomeContentState extends State<HomeContent> {
       print('Error: $e');
       setState(() => isLoading = false);
     }
+  }
+
+  @override
+  void dispose() {
+    _notificationSubscription?.cancel();
+    _audioPlayer.dispose();
+    super.dispose();
   }
 
   @override
@@ -344,13 +390,13 @@ class _HomeContentState extends State<HomeContent> {
                                 document.data()! as Map<String, dynamic>;
                             return GestureDetector(
                               onTap: () {
-                                // Navigator.push(
-                                //   context,
-                                //   MaterialPageRoute(
-                                //     builder: (_) => ServiceProviderDetailScreen(
-                                //         provide: data),
-                                //   ),
-                                // );
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ServiceProviderDetailScreen(
+                                        provide: data),
+                                  ),
+                                );
                               },
                               child: ServiceProviderCardWidget(
                                 name: data['name'],

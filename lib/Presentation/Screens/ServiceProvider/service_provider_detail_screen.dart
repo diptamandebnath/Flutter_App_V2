@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_text_style.dart';
-import '../../../Models/service_provider.dart';
-import '../Order/order_details_screen.dart';
+import '../Order/order_details_screen.dart'; // Corrected import
 
 class ServiceProviderDetailScreen extends StatelessWidget {
-  final ServiceProvider provide;
+  final Map<String, dynamic> provide;
 
   const ServiceProviderDetailScreen({super.key, required this.provide});
 
   // Mock descriptions based on name
   String getMockDescription(String name) {
     switch (name.toLowerCase()) {
-      case 'john plumber':
-        return 'John is a certified plumber with over 8 years of experience. He specializes in residential pipe fittings, leak repairs, and bathroom installations.';
+      case 'pranab':
+        return 'Pranab is a certified plumber with over 8 years of experience. He specializes in residential pipe fittings, leak repairs, and bathroom installations.';
       case 'rahul electrician':
         return 'Rahul is a licensed electrician known for quick diagnostics and safe electrical installations. He has over 5 years of field experience.';
       case 'anita solar expert':
@@ -27,7 +26,7 @@ class ServiceProviderDetailScreen extends StatelessWidget {
   // Mock location based on name
   String getMockLocation(String name) {
     switch (name.toLowerCase()) {
-      case 'john plumber':
+      case 'pranab':
         return 'Delhi, India';
       case 'rahul electrician':
         return 'Mumbai, India';
@@ -42,12 +41,17 @@ class ServiceProviderDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String description = getMockDescription(provide.name.toString());
-    final String location = getMockLocation(provide.name.toString());
+    final String name = provide['name'] ?? 'N/A';
+    final String profession = provide['service'] ?? 'N/A';
+    final String imageUrl = provide['img'] ?? '';
+    final String rating = '4.5'; // This is hardcoded in the home screen
+
+    final String description = getMockDescription(name);
+    final String location = getMockLocation(name);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(provide.name.toString()),
+        title: Text(name),
         centerTitle: true,
         backgroundColor: Colors.white,
       ),
@@ -59,18 +63,24 @@ class ServiceProviderDetailScreen extends StatelessWidget {
             // Profile Image
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                provide.imageUrl.toString(),
-                height: 150,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+              child: imageUrl.isNotEmpty
+                  ? Image.network(
+                      imageUrl,
+                      height: 150,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    )
+                  : Container(
+                      height: 150,
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.person, size: 80, color: Colors.grey),
+                    ),
             ),
             const SizedBox(height: 20),
 
             // Name
             Text(
-              provide.name.toString(),
+              name,
               style: AppTextStyle.textStyle.copyWith(fontSize: 22),
             ),
             const SizedBox(height: 8),
@@ -80,7 +90,7 @@ class ServiceProviderDetailScreen extends StatelessWidget {
               children: [
                 const Icon(Icons.work, size: 20, color: Colors.grey),
                 const SizedBox(width: 6),
-                Text(provide.profession.toString(), style: AppTextStyle.textStyle),
+                Text(profession, style: AppTextStyle.textStyle),
               ],
             ),
             const SizedBox(height: 8),
@@ -90,7 +100,7 @@ class ServiceProviderDetailScreen extends StatelessWidget {
               children: [
                 const Icon(Icons.star, size: 20, color: Colors.amber),
                 const SizedBox(width: 6),
-                Text('Rating: ${provide.rating}', style: AppTextStyle.textStyle),
+                Text('Rating: $rating', style: AppTextStyle.textStyle),
               ],
             ),
             const SizedBox(height: 8),
@@ -128,7 +138,7 @@ class ServiceProviderDetailScreen extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => OrderDetailsScreen(provider: provide),
+                builder: (_) => OrderDetailsScreen(provider: provide), // Corrected Navigation
               ),
             );
           },

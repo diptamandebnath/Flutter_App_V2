@@ -35,7 +35,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
         if (user != null) {
           await user.updateProfile(displayName: nameController.text.trim());
-          // You might want to reload the user to get the updated details
+          
+          // Send verification email
+          await user.sendEmailVerification();
+
+          // Inform the user
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('A verification email has been sent to your email address.'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          
           await user.reload();
 
           Navigator.pushReplacement(
