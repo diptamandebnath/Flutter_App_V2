@@ -15,6 +15,7 @@ import 'package:flutter_home_service_provider_app_clone/Presentation/Screens/Ord
 import 'package:flutter_home_service_provider_app_clone/Presentation/Widgets/service_card_widget.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Widgets/service_provider_card_widget.dart';
 import 'package:flutter_home_service_provider_app_clone/Presentation/Screens/Services/api_service.dart';
+import '../ServiceProvider/service_provider_detail_screen.dart';
 
 class HomePageScreen extends StatefulWidget {
   final bool showLoginSuccessMessage;
@@ -97,23 +98,11 @@ class HomeContent extends StatefulWidget {
 class _HomeContentState extends State<HomeContent> {
   List<String> recommendations = [];
   bool isLoading = true;
-  bool showHeaderNotification = false;
-  final AudioPlayer _audioPlayer = AudioPlayer(); // ✅ Audio player instance
 
   @override
   void initState() {
     super.initState();
     fetchRecommendations();
-
-    // Show header notification after 5 seconds and play sound
-    Timer(const Duration(seconds: 5), () async {
-      setState(() {
-        showHeaderNotification = true;
-      });
-
-      // ✅ Play sound when notification appears
-      await _audioPlayer.play(AssetSource('sounds/notification.mp3'));
-    });
   }
 
   void fetchRecommendations() async {
@@ -129,99 +118,11 @@ class _HomeContentState extends State<HomeContent> {
     }
   }
 
-  void dismissNotification() {
-    setState(() {
-      showHeaderNotification = false;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Column(
         children: [
-          if (showHeaderNotification)
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Row(
-                    children: [
-                      Icon(Icons.notifications_active,
-                          color: AppColors.blueColors, size: 28),
-                      SizedBox(width: 8),
-                      Text(
-                        'New Service Request',
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Order By: John Doe',
-                    style: TextStyle(fontSize: 14, color: Colors.black54),
-                  ),
-                  const Text(
-                    'Time: 10:30 AM, 2025-09-06',
-                    style: TextStyle(fontSize: 14, color: Colors.black54),
-                  ),
-                  const Text(
-                    'Service: AC Repair',
-                    style: TextStyle(fontSize: 14, color: Colors.black54),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0A53DF),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                        ),
-                        onPressed: dismissNotification,
-                        child: const Text('Accept',
-                            style:
-                                TextStyle(fontSize: 14, color: Colors.white)),
-                      ),
-                      const SizedBox(width: 12),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE34208),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                        ),
-                        onPressed: dismissNotification,
-                        child: const Text('Reject',
-                            style:
-                                TextStyle(fontSize: 14, color: Colors.black)),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),

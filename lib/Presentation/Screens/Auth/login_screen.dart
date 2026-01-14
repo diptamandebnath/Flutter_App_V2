@@ -203,7 +203,8 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => const WorkerHomePage(),
+            builder: (context) =>
+                WorkerHomePage(aadharNo: _aadhaarController.text.trim()),
           ),
         );
       } else {
@@ -244,7 +245,8 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const WorkerHomePage(),
+          builder: (context) =>
+              WorkerHomePage(aadharNo: _aadhaarController.text.trim()),
         ),
       );
     } else {
