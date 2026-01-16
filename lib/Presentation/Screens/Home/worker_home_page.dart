@@ -102,13 +102,14 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
   Future<void> _confirmBooking(
       String serviceRequestId, Map<String, dynamic> requestData, double? price) async {
     final firestore = FirebaseFirestore.instance;
+    final acceptedPrice = price ?? requestData['price'];
 
     try {
       await firestore.runTransaction((transaction) async {
         final serviceRequestRef =
             firestore.collection('service_requests').doc(serviceRequestId);
         final bookingRef = firestore.collection('bookings').doc();
-        final notificationRef = firestore.collection('notifications').doc(); // Notification ref
+        final notificationRef = firestore.collection('notifications').doc();
 
         final serviceRequestSnapshot = await transaction.get(serviceRequestRef);
         if (!serviceRequestSnapshot.exists ||
@@ -116,13 +117,13 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
           throw Exception('This job is no longer available.');
         }
 
-        // Update service request
         transaction.update(serviceRequestRef, {
           'status': 'accepted',
           'acceptedBy': widget.aadharNo,
+          'workerName': _workerData?['name'] ?? 'N/A',
+          'acceptedPrice': acceptedPrice,
         });
 
-        // Create booking
         transaction.set(bookingRef, {
           'workerId': widget.aadharNo,
           'workerName': _workerData?['name'] ?? 'N/A',
@@ -131,11 +132,10 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
           'serviceName': requestData['serviceName'],
           'status': 'accepted',
           'regularPrice': requestData['price'],
-          'acceptedPrice': price ?? requestData['price'],
+          'acceptedPrice': acceptedPrice,
           'timestamp': FieldValue.serverTimestamp(),
         });
 
-        // Create notification for the user
         transaction.set(notificationRef, {
           'userId': requestData['userId'],
           'message':
@@ -151,7 +151,7 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
           backgroundColor: Colors.green,
         ),
       );
-      dismissNotification(); // Dismiss header after accepting
+      dismissNotification();
     } catch (e) {
       print('Error confirming booking: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -163,10 +163,92 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
     }
   }
 
+  Future<void> _rejectRequest(String serviceRequestId, Map<String, dynamic> requestData) async {
+    final firestore = FirebaseFirestore.instance;
+    final serviceRequestRef = firestore.collection('service_requests').doc(serviceRequestId);
+    final notificationRef = firestore.collection('notifications').doc();
+
+    try {
+      await firestore.runTransaction((transaction) async {
+        final serviceRequestSnapshot = await transaction.get(serviceRequestRef);
+        if (!serviceRequestSnapshot.exists || serviceRequestSnapshot.data()!['status'] != 'pending') {
+          throw Exception('This job is no longer available.');
+        }
+
+        transaction.update(serviceRequestRef, {'status': 'rejected'});
+
+        transaction.set(notificationRef, {
+          'userId': requestData['userId'],
+          'message': 'Your request for ${requestData['serviceName']} was declined.',
+          'timestamp': FieldValue.serverTimestamp(),
+          'isRead': false,
+        });
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Job request rejected.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      dismissNotification();
+    } catch (e) {
+      print('Error rejecting request: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _renegotiatePrice(String serviceRequestId, Map<String, dynamic> requestData, double newPrice) async {
+    final firestore = FirebaseFirestore.instance;
+    final serviceRequestRef = firestore.collection('service_requests').doc(serviceRequestId);
+
+    try {
+      await firestore.runTransaction((transaction) async {
+        final serviceRequestSnapshot = await transaction.get(serviceRequestRef);
+        if (!serviceRequestSnapshot.exists || serviceRequestSnapshot.data()!['status'] != 'pending') {
+          throw Exception('This job is no longer available.');
+        }
+
+        // Add the new price to the negotiation history
+        transaction.update(serviceRequestRef, {
+          'negotiationHistory': FieldValue.arrayUnion([
+            {
+              'price': newPrice,
+              'proposer': 'worker',
+              'timestamp': FieldValue.serverTimestamp(),
+            }
+          ]),
+          'negotiationCount': FieldValue.increment(1),
+        });
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Your new price has been submitted to the user.'),
+          backgroundColor: Colors.blue,
+        ),
+      );
+    } catch (e) {
+      print('Error renegotiating price: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
   void _showAcceptanceDialog(
       String serviceRequestId, Map<String, dynamic> requestData) {
     int selectedOption = 1;
     final priceController = TextEditingController();
+    final regularPrice = requestData['price'] as double? ?? 0.0;
+    final negotiationCount = requestData['negotiationCount'] as int? ?? 0;
 
     showDialog(
       context: context,
@@ -179,7 +261,7 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   RadioListTile<int>(
-                    title: const Text('Accept with regular price'),
+                    title: Text('Accept with regular price (₹$regularPrice)'),
                     value: 1,
                     groupValue: selectedOption,
                     onChanged: (int? value) {
@@ -211,6 +293,30 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
                         ),
                       ),
                     ),
+                    if (negotiationCount < 3)
+                    RadioListTile<int>(
+                    title: const Text('Re-negotiate Price'),
+                    value: 3,
+                    groupValue: selectedOption,
+                    onChanged: (int? value) {
+                      setState(() {
+                        selectedOption = value!;
+                      });
+                    },
+                  ),
+                  if (selectedOption == 3)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24.0, vertical: 8.0),
+                      child: TextFormField(
+                        controller: priceController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Enter your new price',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
                 ],
               ),
               actions: <Widget>[
@@ -235,8 +341,23 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
                         );
                         return;
                       }
+                       _confirmBooking(serviceRequestId, requestData, customPrice);
+                    } else if (selectedOption == 3) {
+                       customPrice = double.tryParse(priceController.text);
+                      if (customPrice == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please enter a valid price.'),
+                            backgroundColor: Colors.orange,
+                          ),
+                        );
+                        return;
+                      }
+                      _renegotiatePrice(serviceRequestId, requestData, customPrice);
+                    } else {
+                       _confirmBooking(serviceRequestId, requestData, regularPrice);
                     }
-                    _confirmBooking(serviceRequestId, requestData, customPrice);
+
                     Navigator.of(context).pop();
                   },
                 ),
@@ -429,7 +550,7 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 20, vertical: 10),
                             ),
-                            onPressed: dismissNotification,
+                            onPressed: () => _rejectRequest(_latestRequest!.id, latestRequestData),
                             child: const Text('Reject',
                                 style: TextStyle(
                                     fontSize: 14, color: Colors.black)),
@@ -464,7 +585,7 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
                                   .collection('service_requests')
                                   .where('serviceName',
                                       isEqualTo: _workerData?['service'])
-                                  .where('status', isEqualTo: 'pending')
+                                  .where('status', whereIn: ['pending', 'negotiating'])
                                   .snapshots(),
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState ==
@@ -493,26 +614,52 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
                                     final request = snapshot.data!.docs[index];
                                     final data =
                                         request.data() as Map<String, dynamic>;
+                                      final negotiationHistory = data['negotiationHistory'] as List<dynamic>? ?? [];
+
 
                                     return Card(
                                       elevation: 3,
                                       margin: const EdgeInsets.only(bottom: 16),
-                                      child: ListTile(
-                                        leading: const Icon(
-                                          Icons.work,
-                                          color: AppColors.blueColor,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(12.0),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                             ListTile(
+                                                leading: const Icon(
+                                                  Icons.work,
+                                                  color: AppColors.blueColor,
+                                                ),
+                                                title: Text(data['serviceName'] ?? 'N/A'),
+                                                subtitle: Text(
+                                                    'From: ${data['userName'] ?? 'N/A'}'),
+                                              ),
+                                            const Divider(),
+                                            ...negotiationHistory.map((negotiation) {
+                                                return ListTile(
+                                                  title: Text('Offer: ₹${negotiation['price']}'),
+                                                  subtitle: Text('By: ${negotiation['proposer']}'),
+                                                );
+                                            }).toList(),
+                                            const Divider(),
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            Text("Status: ${data['status']}", style: const TextStyle(fontWeight: FontWeight.bold)),
+                                            const Spacer(),
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                _showAcceptanceDialog(
+                                                    request.id, data);
+                                              },
+                                              child: const Text('Respond'),
+                                            ),
+                                          ],
                                         ),
-                                        title: Text(data['serviceName'] ?? 'N/A'),
-                                        subtitle: Text(
-                                            'From: ${data['userName'] ?? 'N/A'}'),
-                                        trailing: ElevatedButton(
-                                          onPressed: () {
-                                            _showAcceptanceDialog(
-                                                request.id, data);
-                                          },
-                                          child: const Text('Accept'),
+                                          ],
                                         ),
-                                      ),
+                                      )
                                     );
                                   },
                                 );

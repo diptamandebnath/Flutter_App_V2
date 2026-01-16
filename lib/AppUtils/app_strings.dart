@@ -242,6 +242,7 @@ class AppStrings {
   static const String confirmlogout = 'Are you sure to logout?';
   static const String cancel = 'Cancel';
   static const String myProfile = 'My Profile';
+  static const String mybooking = 'My Booking';
   static const String diptaman = 'Diptaman';
   static const String changeProfile = 'Change Profile to selling mode';
 

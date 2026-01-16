@@ -1,12 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_colors.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_images.dart';
 import 'package:flutter_home_service_provider_app_clone/AppUtils/app_strings.dart';
-import 'package:flutter_home_service_provider_app_clone/AppUtils/app_text_style.dart';
-import 'package:flutter_home_service_provider_app_clone/Presentation/Widgets/paid_box_style_widget.dart';
-import 'package:flutter_home_service_provider_app_clone/Presentation/Widgets/schedule_widget.dart';
-import 'package:flutter_home_service_provider_app_clone/Presentation/Widgets/text_container_widget.dart';
-import 'mock_payment_screen.dart';
+import 'package:flutter_home_service_provider_app_clone/Presentation/Screens/Order/order_detail_screen.dart';
+import 'package:intl/intl.dart';
 
 class OrderScreens extends StatefulWidget {
   const OrderScreens({super.key});
@@ -16,76 +15,14 @@ class OrderScreens extends StatefulWidget {
 }
 
 class _OrderScreensState extends State<OrderScreens> {
-  bool unpaid = true;
-  bool paid = false;
-  bool schedule = false;
-
-  Widget orderBody() {
-    if (unpaid) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(AppStrings.youHave, style: AppTextStyle.textStyle),
-          const SizedBox(height: 8),
-          const PaidBoxStyleWidget(
-            pay: true,
-            icons: AppImages.plumbericonImg,
-            title: AppStrings.plumbing,
-            amount: 200.00,
-            date: 'May 28, 2024',
-            name: 'Janavi',
-          ),
-        ],
-      );
-    } else if (paid) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(AppStrings.paidServices, style: AppTextStyle.textStyle),
-          const SizedBox(height: 7),
-          const PaidBoxStyleWidget(
-            pay: false,
-            icons: AppImages.plumbericonImg,
-            title: AppStrings.plumbing,
-            amount: 300.00,
-            date: 'May 25, 2024',
-            name: 'Janavi',
-          ),
-          const PaidBoxStyleWidget(
-            pay: false,
-            icons: AppImages.paintericonImg,
-            title: AppStrings.painter,
-            amount: 500.00,
-            date: 'May 24, 2024',
-            name: 'Varun',
-          ),
-        ],
-      );
-    } else {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(AppStrings.upcoming, style: AppTextStyle.textStyle),
-          const SizedBox(height: 7),
-          const ScheduleStyleWidget(
-            icons: AppImages.plumbericonImg,
-            title: AppStrings.plumbing,
-            amount: 200.00,
-            date: "May 28, 2024",
-            time: '10:00 AM',
-            name: "Janavi",
-          ),
-        ],
-      );
-    }
-  }
+  final userId = FirebaseAuth.instance.currentUser!.uid;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          AppStrings.myProfile,
+          AppStrings.mybooking,
           style: TextStyle(
             color: AppColors.blueColors,
             fontWeight: FontWeight.w600,
@@ -96,97 +33,321 @@ class _OrderScreensState extends State<OrderScreens> {
           child: Image.asset(AppImages.logofixitImg),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 7),
-              child: Container(
-                height: 55,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(6),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color.fromARGB(255, 214, 226, 236),
-                      blurRadius: 3,
-                      spreadRadius: 1,
-                      offset: Offset(0, 3),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('service_requests')
+            .where('userId', isEqualTo: userId)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return const Center(
+                child: Text('An error occurred while fetching your bookings.'));
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text('You have no bookings yet.'));
+          }
+
+          final bookings = snapshot.data!.docs;
+          bookings.sort((a, b) {
+            var aData = a.data() as Map<String, dynamic>;
+            var bData = b.data() as Map<String, dynamic>;
+            Timestamp? aTimestamp = aData['timestamp'];
+            Timestamp? bTimestamp = bData['timestamp'];
+            if (aTimestamp == null && bTimestamp == null) return 0;
+            if (aTimestamp == null) return 1;
+            if (bTimestamp == null) return -1;
+            return bTimestamp.compareTo(aTimestamp);
+          });
+
+          return ListView.builder(
+            itemCount: bookings.length,
+            itemBuilder: (context, index) {
+              final booking = bookings[index];
+              final data = booking.data() as Map<String, dynamic>;
+              final negotiationHistory =
+                  data['negotiationHistory'] as List<dynamic>? ?? [];
+
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => OrderDetailScreen(orderData: data),
                     ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          unpaid = true;
-                          paid = false;
-                          schedule = false;
-                        });
-                      },
-                      child: TextContainerWidget(
-                        select: unpaid,
-                        title: AppStrings.unpaid,
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          unpaid = false;
-                          paid = true;
-                          schedule = false;
-                        });
-                      },
-                      child: TextContainerWidget(
-                        select: paid,
-                        title: AppStrings.paid,
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          unpaid = false;
-                          paid = false;
-                          schedule = true;
-                        });
-                      },
-                      child: TextContainerWidget(
-                        select: schedule,
-                        title: AppStrings.schedule,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            orderBody(),
-            if (unpaid)
-              Padding(
-                padding: const EdgeInsets.only(top: 20),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const MockPaymentScreen(),
+                  );
+                },
+                child: Card(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              data['serviceName'] ?? 'N/A',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
+                            ),
+                            _buildStatusChip(data['status']),
+                          ],
                         ),
-                      );
-                    },
-                    child: const Text("PAY ALL"),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            const Icon(Icons.person, size: 16, color: Colors.grey),
+                            const SizedBox(width: 8),
+                            Text(
+                              data['workerName'] ?? 'Not Assigned',
+                              style: const TextStyle(
+                                  fontSize: 14, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(Icons.calendar_today,
+                                size: 16, color: Colors.grey),
+                            const SizedBox(width: 8),
+                            Text(
+                              data['timestamp'] != null
+                                  ? DateFormat.yMMMd().add_jm().format(
+                                      (data['timestamp'] as Timestamp).toDate(),
+                                    )
+                                  : 'N/A',
+                              style: const TextStyle(
+                                  fontSize: 14, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                        if (data['acceptedPrice'] != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              'Final Price: ₹${data['acceptedPrice']}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: AppColors.blueColors,
+                              ),
+                            ),
+                          ),
+                        const Divider(height: 24),
+                        if (negotiationHistory.isNotEmpty)
+                          _buildNegotiationHistory(negotiationHistory),
+                        if (data['status'] == 'pending' ||
+                            data['status'] == 'negotiating')
+                          _buildActionButtons(booking.id, data),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-          ],
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildStatusChip(String? status) {
+    Color chipColor;
+    String chipText = status ?? 'Unknown';
+
+    switch (status) {
+      case 'pending':
+        chipColor = Colors.orange;
+        break;
+      case 'accepted':
+        chipColor = Colors.green;
+        break;
+      case 'rejected':
+        chipColor = Colors.red;
+        break;
+      case 'canceled':
+        chipColor = Colors.grey;
+        break;
+      case 'negotiating':
+        chipColor = Colors.blue;
+        break;
+      default:
+        chipColor = Colors.black;
+    }
+
+    return Chip(
+      label: Text(
+        chipText,
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      ),
+      backgroundColor: chipColor,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+    );
+  }
+
+  Widget _buildNegotiationHistory(List<dynamic> history) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Negotiation History',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
+        const SizedBox(height: 8),
+        ...history.map((negotiation) {
+          final proposer = negotiation['proposer'] == 'user' ? 'You' : 'Worker';
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 4.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('$proposer: ₹${negotiation['price']}'),
+                Text(
+                  DateFormat.jm()
+                      .format((negotiation['timestamp'] as Timestamp).toDate()),
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+        const Divider(height: 24),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons(
+      String bookingId, Map<String, dynamic> bookingData) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        OutlinedButton(
+          onPressed: () {
+            _showRenegotiateDialog(bookingId, bookingData);
+          },
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.blueColors,
+            side: const BorderSide(color: AppColors.blueColors),
+          ),
+          child: const Text('Renegotiate'),
+        ),
+        const SizedBox(width: 8),
+        ElevatedButton(
+          onPressed: () {
+            _cancelBooking(bookingId);
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+          ),
+          child: const Text('Cancel'),
+        ),
+      ],
+    );
+  }
+
+  void _showRenegotiateDialog(
+      String bookingId, Map<String, dynamic> bookingData) {
+    final priceController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Renegotiate Price'),
+          content: TextFormField(
+            controller: priceController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Enter your new price',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final newPrice = double.tryParse(priceController.text);
+                if (newPrice != null) {
+                  _renegotiatePrice(bookingId, newPrice);
+                  Navigator.pop(context);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please enter a valid price.'),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                }
+              },
+              child: const Text('Submit'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _renegotiatePrice(String bookingId, double newPrice) async {
+    final firestore = FirebaseFirestore.instance;
+    final serviceRequestRef =
+        firestore.collection('service_requests').doc(bookingId);
+
+    try {
+      await firestore.runTransaction((transaction) async {
+        transaction.update(serviceRequestRef, {
+          'negotiationHistory': FieldValue.arrayUnion([
+            {
+              'price': newPrice,
+              'proposer': 'user',
+              'timestamp': FieldValue.serverTimestamp(),
+            }
+          ]),
+          'status': 'negotiating',
+        });
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Your new price has been submitted to the worker.'),
+          backgroundColor: Colors.blue,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('An error occurred while renegotiating.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _cancelBooking(String bookingId) async {
+    await FirebaseFirestore.instance
+        .collection('service_requests')
+        .doc(bookingId)
+        .update({'status': 'canceled'});
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Booking Canceled'),
+        backgroundColor: Colors.red,
       ),
     );
   }
