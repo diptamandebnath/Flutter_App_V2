@@ -640,7 +640,7 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
                                                   title: Text('Offer: ₹${negotiation['price']}'),
                                                   subtitle: Text('By: ${negotiation['proposer']}'),
                                                 );
-                                            }).toList(),
+                                            }),
                                             const Divider(),
                                         Row(
                                           mainAxisSize: MainAxisSize.min,

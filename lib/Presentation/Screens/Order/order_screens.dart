@@ -222,7 +222,7 @@ class _OrderScreensState extends State<OrderScreens> {
               ],
             ),
           );
-        }).toList(),
+        }),
         const Divider(height: 24),
       ],
     );
